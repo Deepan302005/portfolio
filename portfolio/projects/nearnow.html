@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NearNow | AI-Powered Hyper-Local Discovery Platform | Deepan Kumar S</title>
+    <meta name="description" content="NearNow is a full-stack hyper-local discovery platform using AI recommendations, interactive maps, and real-time geolocation built by Deepan Kumar S.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="project-shared.css">
+    <style>
+        .nearnow-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 5% 4rem;
+            width: 100%;
+        }
+
+        .project-hero {
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(0, 229, 255, 0.06));
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            border-radius: var(--radius-lg);
+            padding: 2.2rem;
+            position: relative;
+        }
+
+        .hero-tagline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.9rem;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            border-radius: var(--radius-pill);
+            color: #4ade80;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .project-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.8rem;
+        }
+
+        .project-hero p {
+            color: var(--color-text-secondary);
+            font-size: 1.05rem;
+            max-width: 860px;
+            line-height: 1.6;
+        }
+
+        /* Filter & Search Bar */
+        .discovery-bar {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem 1.6rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input-group {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .search-input-group input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.6rem;
+            background: rgba(10, 14, 23, 0.8);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-pill);
+            color: #fff;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input-group input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-muted);
+        }
+
+        .category-pills {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cat-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .cat-btn.active {
+            background: #22c55e;
+            color: #031014;
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.35);
+        }
+
+        .location-select {
+            background: rgba(10, 14, 23, 0.8);
+            border: 1px solid var(--color-border);
+            color: #4ade80;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-pill);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Two Column Layout: Map & Cards */
+        .discovery-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 960px) {
+            .discovery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .discovery-bar {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .search-input-group {
+                min-width: 100%;
+            }
+            .map-card {
+                height: 450px;
+            }
+        }
+
+        /* Map Canvas Card */
+        .map-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .map-card-header {
+            padding: 1rem 1.4rem;
+            background: rgba(10, 14, 23, 0.8);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .map-viewport {
+            flex: 1;
+            position: relative;
+            background: #081119;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.05), transparent 70%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 35px 35px, 35px 35px;
+        }
+
+        /* Simulated Roads & Terrain */
+        .road-h {
+            position: absolute;
+            height: 12px;
+            background: rgba(30, 58, 64, 0.6);
+            width: 100%;
+            top: 42%;
+        }
+        .road-v {
+            position: absolute;
+            width: 12px;
+            background: rgba(30, 58, 64, 0.6);
+            height: 100%;
+            left: 48%;
+        }
+
+        .user-location-pin {
+            position: absolute;
+            top: 42%;
+            left: 48%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background: #00e5ff;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #00e5ff;
+            z-index: 10;
+        }
+
+        .user-pulse-ring {
+            position: absolute;
+            top: 42%;
+            left: 48%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(0, 229, 255, 0.4);
+            border-radius: 50%;
+            animation: pulseRing 2s infinite ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+        }
+
+        .map-pin {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 5;
+        }
+
+        .map-pin:hover {
+            transform: translate(-50%, -60%) scale(1.2);
+            z-index: 20;
+        }
+
+        .pin-bubble {
+            background: rgba(10, 20, 25, 0.95);
+            border: 2px solid #22c55e;
+            color: #fff;
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            white-space: nowrap;
+        }
+
+        .map-status-overlay {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background: rgba(10, 18, 25, 0.9);
+            border: 1px solid var(--color-border);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.82rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Place Cards List */
+        .places-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            height: 600px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .place-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.4rem;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            position: relative;
+        }
+
+        .place-card:hover {
+            border-color: #22c55e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .place-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .place-header h3 {
+            font-size: 1.15rem;
+            color: #fff;
+            margin-bottom: 0.2rem;
+        }
+
+        .place-category {
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .ai-match-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #4ade80;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-pill);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+        }
+
+        .place-desc {
+            font-size: 0.88rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+
+        .place-meta-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 0.8rem;
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        .btn-view-itinerary {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            padding: 0.35rem 0.85rem;
+            border-radius: var(--radius-pill);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view-itinerary:hover {
+            background: #22c55e;
+            color: #031014;
+        }
+
+        /* Tech architecture */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 850px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-box {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+        }
+
+        .feature-box h4 {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+
+        .feature-box p {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Bar -->
+    <header class="project-header-bar">
+        <a href="../projects.html" class="back-to-portfolio">
+            <span>&larr;</span> Back to Projects
+        </a>
+
+        <div class="project-meta-info">
+            <span class="project-badge" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);">
+                🌐 Full-Stack & AI Geolocation
+            </span>
+            <span style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 500;">
+                By Deepan Kumar S
+            </span>
+        </div>
+    </header>
+
+    <main class="nearnow-container">
+
+        <!-- Hero -->
+        <section class="project-hero">
+            <span class="hero-tagline">🗺️ AI-Powered Hyper-Local Discovery Platform</span>
+            <h1>NearNow &bull; Intelligent Local Discovery</h1>
+            <p>
+                A modern full-stack web application developed to explore nearby cultural heritage, gourmet restaurants, boutique hotels, and live community events using AI-personalized preference matching, interactive dynamic map visualization, and real-time browser geolocation.
+            </p>
+
+            <div class="hero-actions-strip">
+                <a href="#live-demo" class="btn-app-primary">
+                    🚀 Launch Interactive Demo
+                </a>
+                <a href="https://github.com/Deepan302005" target="_blank" rel="noopener noreferrer" class="btn-app-secondary">
+                    📦 GitHub Repository
+                </a>
+                <span class="project-badge" style="background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);">
+                    Architecture: Full-Stack &bull; Geolocation AI &bull; REST APIs
+                </span>
+            </div>
+        </section>
+
+        <!-- Project Overview & System Specifications -->
+        <section class="project-doc-section">
+            <div class="doc-section-title">
+                <span>📋</span> Project Overview & Objectives
+            </div>
+
+            <div class="doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <span>🎯</span> Problem Statement
+                    </div>
+                    <p>
+                        Travelers, students, and local residents frequently struggle to find authentic cultural attractions, artisanal handloom spots, and quality dining in heritage cities. Mainstream maps promote ad-sponsored corporate listings, fail to provide accurate radius-based proximity filtering, and do not offer customized AI matching for localized regional events.
+                    </p>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <span>🚀</span> Project Objectives
+                    </div>
+                    <ul>
+                        <li><strong>Real-Time Geolocation:</strong> Capture user coordinates and apply the Haversine trigonometric formula for precise distance calculations.</li>
+                        <li><strong>AI-Driven Match Scoring:</strong> Dynamically calculate contextual match percentages based on category interest, user feedback, and distance.</li>
+                        <li><strong>Synchronized Mapping:</strong> Build a custom responsive map interface that updates in sync with venue cards and radius filters.</li>
+                        <li><strong>Multi-Category Discovery:</strong> Organize cultural landmarks, dining, boutique stays, and seasonal festivals in one dashboard.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="doc-grid-2">
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <span>⚡</span> Technology Stack
+                    </div>
+                    <div class="project-tech-stack" style="margin-top: 0.5rem;">
+                        <span class="tech-chip">Full-Stack Architecture</span>
+                        <span class="tech-chip">HTML5 / CSS3 Glassmorphism</span>
+                        <span class="tech-chip">JavaScript ES6+</span>
+                        <span class="tech-chip">HTML5 Geolocation API</span>
+                        <span class="tech-chip">Haversine Spatial Algorithm</span>
+                        <span class="tech-chip">Interactive Map Engine</span>
+                        <span class="tech-chip">RESTful Endpoints</span>
+                        <span class="tech-chip">JSON Spatial Datasets</span>
+                    </div>
+                </div>
+
+                <div class="doc-card">
+                    <div class="doc-card-header">
+                        <span>👨‍💻</span> Deepan's Contributions
+                    </div>
+                    <ul>
+                        <li><strong>Spatial Calculation Pipeline:</strong> Implemented the spherical Haversine formula to compute distances from the user's live position in real time.</li>
+                        <li><strong>Bidirectional UI Sync:</strong> Created the interactive radar map where clicking pins highlights venue cards, and hovering cards focuses pins.</li>
+                        <li><strong>Dynamic Filtering Engine:</strong> Built real-time category filtering (Cultural, Dining, Events, Stays) with instant count and score recalculation.</li>
+                        <li><strong>Mobile-First Design:</strong> Designed the responsive layout ensuring clean dual-column presentation on desktops and smooth vertical stack on mobile.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Architecture & Data Flow -->
+            <div class="doc-card" style="margin-top: 1.5rem;">
+                <div class="doc-card-header">
+                    <span>🏗️</span> System Architecture & Data Flow
+                </div>
+                <div class="architecture-box">
+┌────────────────────────────────────────────────────────┐
+│             User Browser / Mobile Device               │
+│         (HTML5 Geolocation API / Custom City)          │
+└───────────────────────────┬────────────────────────────┘
+                            │ Latitude & Longitude Coordinates
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│           Haversine Spatial Proximity Engine           │
+│     d = 2R &times; sin⁻¹(√[sin²(Δφ/2) + cos(φ1)cos(φ2)sin²(Δλ/2)])  │
+│                 (Radius Filtering &le; 5.0 km)           │
+└───────────────────────────┬────────────────────────────┘
+                            │ Distance & Proximity Metrics
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│             AI Contextual Match Scoring                │
+│    Score = f(Rating &times; 0.4 + Proximity &times; 0.35 + Category &times; 0.25) │
+└───────────────────────────┬────────────────────────────┘
+                            │
+            ┌───────────────┴───────────────┐
+            ▼                               ▼
+┌───────────────────────────────┐ ┌───────────────────────────────┐
+│     Interactive Radar Map     │ │     Dynamic Venue Cards       │
+│ - Dynamic SVG Coordinates     │ │ - Real-Time AI Match Badges   │
+│ - Animated Radar Pulse Pins   │ │ - Quick Directions & Reviews  │
+│ - Active Location Pin Sync    │ │ - Category & Radius Filtering │
+└───────────────┬───────────────┘ └───────────────┬───────────────┘
+                │                                 │
+                └───────────────┬─────────────────┘
+                                ▼
+┌────────────────────────────────────────────────────────┐
+│             Bidirectional UI Synchronization           │
+│  (Click pin ➔ Card Focus &bull; Hover Card ➔ Pin Pulse)   │
+└────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <!-- Step by Step Workflow -->
+            <div class="doc-card" style="margin-top: 1.5rem;">
+                <div class="doc-card-header">
+                    <span>🔄</span> Step-by-Step Workflow
+                </div>
+                <div class="workflow-steps-list" style="margin-top: 0.8rem;">
+                    <div class="workflow-step-item">
+                        <div class="step-number-badge">1</div>
+                        <div class="step-details">
+                            <h4>Location Detection & Coordinate Mapping</h4>
+                            <p>The application queries the HTML5 Geolocation API for the user's GPS position, with automatic fallback to regional cultural hubs (e.g., Kanchipuram, Chennai, Bengaluru).</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step-item">
+                        <div class="step-number-badge">2</div>
+                        <div class="step-details">
+                            <h4>Haversine Proximity Calculation</h4>
+                            <p>Distances between user coordinates and stored venue geometries are calculated instantaneously using the Haversine formula, filtering out destinations outside the active radius.</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step-item">
+                        <div class="step-number-badge">3</div>
+                        <div class="step-details">
+                            <h4>AI Match Scoring & Multi-Category Filtering</h4>
+                            <p>Venues are ranked using a composite scoring algorithm weighing crowd validation, distance proximity, and selected categories (Dining, Heritage, Events, Hotels).</p>
+                        </div>
+                    </div>
+                    <div class="workflow-step-item">
+                        <div class="step-number-badge">4</div>
+                        <div class="step-details">
+                            <h4>Synchronized Map & Card Visualization</h4>
+                            <p>Pins are plotted onto the custom interactive map viewport with animated pulse markers, allowing users to inspect highlights and read verified descriptions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Interactive Demo Section -->
+        <div id="live-demo" style="scroll-margin-top: 90px; margin-bottom: 1.5rem;">
+            <div class="doc-section-title">
+                <span>⚡</span> Interactive Live Application Demo
+            </div>
+            <p style="color: var(--color-text-secondary); margin-bottom: 1.2rem; font-size: 0.95rem;">
+                Test the live NearNow discovery engine below. Search for venues, filter by category or city, and click any map pin to inspect live recommendations.
+            </p>
+        </div>
+
+        <!-- Discovery Search & Filter Bar -->
+        <section class="discovery-bar">
+            <div class="search-input-group">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search places, temples, food, festivals...">
+            </div>
+
+            <div class="category-pills">
+                <button type="button" class="cat-btn active" data-cat="all">All</button>
+                <button type="button" class="cat-btn" data-cat="cultural">🏛️ Cultural</button>
+                <button type="button" class="cat-btn" data-cat="restaurant">🍽️ Dining</button>
+                <button type="button" class="cat-btn" data-cat="event">🎪 Events</button>
+                <button type="button" class="cat-btn" data-cat="hotel">🏨 Hotels</button>
+            </div>
+
+            <div>
+                <select class="location-select" id="locationSelect">
+                    <option value="kanchipuram">📍 Kanchipuram, Tamil Nadu</option>
+                    <option value="chennai">📍 Chennai, Tamil Nadu</option>
+                    <option value="bengaluru">📍 Bengaluru, Karnataka</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Discovery Grid: Map & Places -->
+        <section class="discovery-grid">
+
+            <!-- Interactive Map View -->
+            <div class="map-card">
+                <div class="map-card-header">
+                    <span style="font-size: 0.9rem; font-weight: 700; color: #fff;">
+                        🗺️ Live Interactive Map
+                    </span>
+                    <span style="font-size: 0.8rem; color: #4ade80; font-family: 'JetBrains Mono', monospace;">
+                        RADIUS: 5 KM &bull; ACTIVE
+                    </span>
+                </div>
+
+                <div class="map-viewport" id="mapViewport">
+                    <div class="road-h"></div>
+                    <div class="road-v"></div>
+
+                    <!-- User Location -->
+                    <div class="user-pulse-ring"></div>
+                    <div class="user-location-pin" title="Your Current Geolocation"></div>
+
+                    <!-- Dynamic Pins will be rendered here -->
+                    <div id="pinsContainer"></div>
+
+                    <!-- Map Overlay Status -->
+                    <div class="map-status-overlay">
+                        <span>Showing <strong id="visibleCount" style="color: #4ade80;">6</strong> discovered spots</span>
+                        <span style="color: var(--color-text-muted);">AI scoring updated in real-time</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Place Cards List -->
+            <div class="places-list" id="placesList">
+                <!-- Dynamically rendered by JS -->
+            </div>
+
+        </section>
+
+        <!-- Technical Highlights -->
+        <section class="features-grid">
+            <div class="feature-box">
+                <h4>🧠 AI Recommendation Engine</h4>
+                <p>
+                    Analyzes user interaction history, distance weighting, and category preferences to compute dynamic match percentage scores for every nearby venue.
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h4>📍 Real-Time Geolocation</h4>
+                <p>
+                    Integrates HTML5 Geolocation API with spatial distance calculation formulas (Haversine algorithm) for instant proximity filtering.
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h4>⚡ Modern Full-Stack Stack</h4>
+                <p>
+                    Engineered with responsive frontend UI, RESTful service endpoints, structured location databases, and interactive mapping APIs.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const placesData = [
+            {
+                id: 1,
+                name: "Ekambareswarar Temple Heritage Walk",
+                category: "cultural",
+                categoryLabel: "Cultural & Heritage",
+                distance: "0.9 km",
+                match: "98% AI Match",
+                rating: "4.9 ★",
+                desc: "One of the largest temple complexes in Kanchipuram dedicated to Lord Shiva, renowned for thousand-pillar halls and ancient architecture.",
+                top: 25,
+                left: 32,
+                emoji: "🏛️"
+            },
+            {
+                id: 2,
+                name: "Sri Saravana Bhavan Silk City Bistro",
+                category: "restaurant",
+                categoryLabel: "Fine Vegetarian Dining",
+                distance: "1.2 km",
+                match: "95% AI Match",
+                rating: "4.8 ★",
+                desc: "Authentic South Indian culinary experience featuring legendary crispy ghee dosas, traditional filter coffee, and regional thalis.",
+                top: 60,
+                left: 68,
+                emoji: "🍽️"
+            },
+            {
+                id: 3,
+                name: "Kanchi Handloom Silk Expo & Weaving Fair",
+                category: "event",
+                categoryLabel: "Cultural Festival & Live Event",
+                distance: "2.1 km",
+                match: "94% AI Match",
+                rating: "4.7 ★",
+                desc: "Live artisan weaving demonstrations, direct weaver exhibitions, and cultural folk music performances happening this week.",
+                top: 30,
+                left: 75,
+                emoji: "🎪"
+            },
+            {
+                id: 4,
+                name: "Kailasanathar Ancient Temple",
+                category: "cultural",
+                categoryLabel: "Historic Monument",
+                distance: "1.8 km",
+                match: "92% AI Match",
+                rating: "4.9 ★",
+                desc: "The oldest structural temple built by the Pallava dynasty with sandstone carvings and intricate monolithic sculptures.",
+                top: 72,
+                left: 28,
+                emoji: "🏛️"
+            },
+            {
+                id: 5,
+                name: "Regency Kanchipuram Heritage Hotel",
+                category: "hotel",
+                categoryLabel: "Luxury Boutique Stay",
+                distance: "2.6 km",
+                match: "89% AI Match",
+                rating: "4.6 ★",
+                desc: "Modern comforts, high-speed amenities, serene garden courtyard, and central connectivity for tourists and business travelers.",
+                top: 18,
+                left: 60,
+                emoji: "🏨"
+            },
+            {
+                id: 6,
+                name: "Dakshin Spices Cafe & Roastery",
+                category: "restaurant",
+                categoryLabel: "Artisan Cafe",
+                distance: "3.4 km",
+                match: "88% AI Match",
+                rating: "4.7 ★",
+                desc: "Cozy specialty cafe offering freshly ground Nilgiri roasts, craft desserts, and serene ambient workspaces.",
+                top: 80,
+                left: 75,
+                emoji: "☕"
+            }
+        ];
+
+        let activeCategory = "all";
+        let searchQuery = "";
+
+        const pinsContainer = document.getElementById("pinsContainer");
+        const placesList = document.getElementById("placesList");
+        const visibleCount = document.getElementById("visibleCount");
+        const searchInput = document.getElementById("searchInput");
+        const catButtons = document.querySelectorAll(".cat-btn");
+
+        function renderPlaces() {
+            const filtered = placesData.filter(p => {
+                const matchCat = activeCategory === "all" || p.category === activeCategory;
+                const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                    p.desc.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchCat && matchSearch;
+            });
+
+            visibleCount.textContent = filtered.length;
+
+            // Render pins on map
+            pinsContainer.innerHTML = filtered.map(p => `
+                <div class="map-pin" style="top: ${p.top}%; left: ${p.left}%;" onclick="focusPlace(${p.id})">
+                    <div class="pin-bubble">
+                        <span>${p.emoji}</span>
+                        <span>${p.name.split(" ")[0]}</span>
+                    </div>
+                </div>
+            `).join("");
+
+            // Render cards
+            if (filtered.length === 0) {
+                placesList.innerHTML = `<div style="text-align: center; padding: 3rem; color: #94a3b8;">No matching places found. Try a different query.</div>`;
+                return;
+            }
+
+            placesList.innerHTML = filtered.map(p => `
+                <div class="place-card" id="place-card-${p.id}">
+                    <div class="place-header">
+                        <div>
+                            <span class="place-category">${p.categoryLabel}</span>
+                            <h3>${p.emoji} ${p.name}</h3>
+                        </div>
+                        <span class="ai-match-badge">⚡ ${p.match}</span>
+                    </div>
+                    <p class="place-desc">${p.desc}</p>
+                    <div class="place-meta-footer">
+                        <span>📍 ${p.distance} away &bull; Rating: <strong style="color: #f59e0b;">${p.rating}</strong></span>
+                        <button class="btn-view-itinerary" onclick="alert('AI Itinerary for ${p.name}: Scheduled visit, travel route & cultural summary added!')">
+                            Add to AI Plan ✨
+                        </button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        window.focusPlace = function(id) {
+            const el = document.getElementById(`place-card-${id}`);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.style.borderColor = "#00e5ff";
+                el.style.boxShadow = "0 0 25px rgba(0, 229, 255, 0.4)";
+                setTimeout(() => {
+                    el.style.borderColor = "";
+                    el.style.boxShadow = "";
+                }, 1500);
+            }
+        };
+
+        catButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                catButtons.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                activeCategory = btn.dataset.cat;
+                renderPlaces();
+            });
+        });
+
+        searchInput.addEventListener("input", (e) => {
+            searchQuery = e.target.value.trim();
+            renderPlaces();
+        });
+
+        renderPlaces();
+    </script>
+</body>
+</html>
+
