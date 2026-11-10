@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+        content="Deepan Kumar S - Aspiring IT Professional with strong leadership, communication, and multitasking abilities. Background, college, and profile details.">
+    <meta name="author" content="Deepan Kumar S">
+
+    <title>About Me | Deepan Kumar S</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ==================== Preloader ==================== -->
+    <div class="preloader" aria-label="Loading portfolio">
+        <div class="loading-text">Deepan Kumar S &bull; Loading About...</div>
+    </div>
+
+
+    <!-- ==================== Navigation ==================== -->
+    <header>
+        <nav class="navbar" aria-label="Main Navigation">
+
+            <a href="index.html" class="logo" aria-label="Deepan Kumar S - Home">
+                <span class="logo-accent">&lt;</span>Deepan Kumar S<span class="logo-accent"> /&gt;</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="experience.html">Experience</a></li>
+                <li><a href="skills.html">Skills</a></li>
+                <li><a href="projects.html">Projects</a></li>
+                <li><a href="achievements.html">Achievements</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+
+            <button class="hamburger" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+        </nav>
+    </header>
+
+
+    <main class="page-container">
+
+        <!-- ==================== About Section ==================== -->
+        <section id="about" class="about" style="border: none; background: transparent; padding-top: 2rem;">
+
+            <div class="section-title">
+                <h2>About Me</h2>
+                <p>Background, professional profile, and career journey</p>
+            </div>
+
+            <div class="about-content">
+
+                <div class="about-text">
+
+                    <p>
+                        Aspiring IT Professional with strong leadership, communication, and multitasking abilities. Enthusiastic and proactive in learning new technologies and adapting to dynamic environments.
+                    </p>
+
+                    <p>
+                        Demonstrates the ability to collaborate effectively within teams, solve problems efficiently, and contribute to organizational goals with a positive attitude and a commitment to continuous growth. Experienced in computer vision (OpenCV & EasyOCR), generative AI pipelines (RAG & LLMs), and full-stack web application development.
+                    </p>
+
+                    <div class="personal-info">
+
+                        <div class="info-item">
+                            <span class="info-label">Name</span>
+                            <span class="info-value">Deepan Kumar S</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Degree</span>
+                            <span class="info-value">B.Tech - Information Technology</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">College</span>
+                            <span class="info-value">Rajalakshmi Engineering College</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">CGPA</span>
+                            <span class="info-value" style="color: var(--color-primary); font-weight: 700;">7.87 / 10.0</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Location</span>
+                            <span class="info-value">Kanchipuram, Tamil Nadu, India</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">deepanmdsaran77@gmail.com</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">+91 7826966784</span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Soft Skills</span>
+                            <span class="info-value">Planning, Team Collaboration</span>
+                        </div>
+
+                    </div>
+
+                    <!-- Quick Navigation Actions -->
+                    <div class="buttons" style="margin-top: 2rem;">
+                        <a href="experience.html" class="btn-primary">
+                            View Experience & Education 💼
+                        </a>
+                        <button type="button" class="btn-resume" id="openResumeBtn">
+                            View Resume 📄
+                        </button>
+                        <a href="skills.html" class="btn-secondary">
+                            Explore Skills ⚡
+                        </a>
+                        <a href="projects.html" class="btn-secondary">
+                            View Projects 🚀
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- About Photo Showcase -->
+                <div class="about-photo-showcase">
+                    
+                    <div class="about-image-card">
+                        <div class="glowing-border"></div>
+                        <div class="about-photo-wrapper">
+                            <img src="assets/images/profile.jpg" alt="Deepan Kumar S Portrait" class="about-photo" id="aboutProfilePhoto">
+                            <div class="photo-overlay-tag">
+                                <span>Deepan Kumar S</span>
+                                <small>IT Professional &bull; Kanchipuram</small>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ==================== Interactive Resume Modal ==================== -->
+    <div class="resume-modal-overlay" id="resumeModalOverlay" role="dialog" aria-modal="true" aria-labelledby="resumeModalTitle">
+        <div class="resume-modal-box">
+            <button class="modal-close-icon" id="closeResumeModalBtn" aria-label="Close resume viewer">✕</button>
+
+            <div class="resume-header">
+                <div>
+                    <h2 id="resumeModalTitle">DEEPAN KUMAR S</h2>
+                    <div class="resume-contact-strip">
+                        <span>📱 +91 7826966784</span>
+                        <span>✉️ deepanmdsaran77@gmail.com</span>
+                        <span>📍 Kanchipuram, Tamil Nadu, India</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Me -->
+            <div class="resume-sec">
+                <div class="resume-sec-title">About Me</div>
+                <p>
+                    Aspiring IT Professional with strong leadership, communication, and multitasking abilities. Enthusiastic and proactive in learning new technologies and adapting to dynamic environments. Demonstrates the ability to collaborate effectively within teams, solve problems efficiently, and contribute to organizational goals with a positive attitude and a commitment to continuous growth.
+                </p>
+            </div>
+
+            <!-- Skills -->
+            <div class="resume-sec">
+                <div class="resume-sec-title">Skills</div>
+                <p><strong>Programming Languages:</strong> Python, Java, JavaScript</p>
+                <p><strong>Technical Skills:</strong> Web Development, Database Management, Full Stack Development, OpenCV, EasyOCR, RAG Pipelines</p>
+                <p><strong>Soft Skills:</strong> Planning, Team Collaboration, Leadership, Multitasking</p>
+            </div>
+
+            <!-- Projects -->
+            <div class="resume-sec">
+                <div class="resume-sec-title">Projects</div>
+                <p style="margin-bottom: 0.5rem;">
+                    <strong>HealthSpan - A Personalized Dietary Nutrition System for Elderly Health Management:</strong> Developed a comprehensive dietary healthcare ecosystem (Flutter mobile, React+Vite web, FastAPI backend) combining Llama 3 generative intelligence with FAISS vector similarity search, condition-specific meal plans, and automated medication-nutrient safety checks.
+                </p>
+                <p style="margin-bottom: 0.5rem;">
+                    <strong>Automatic License Plate Recognition (ALPR):</strong> Developed a real-time ALPR system using Python and OpenCV for live number plate detection and EasyOCR for text reading, with smooth video processing for accurate, low-latency recognition.
+                </p>
+                <p style="margin-bottom: 0.5rem;">
+                    <strong>NearNow – AI-Powered Hyper-Local Discovery Platform:</strong> Built a full-stack web application for discovering nearby events, restaurants, hotels, and cultural places using AI-powered recommendations, interactive maps, and real-time geolocation.
+                </p>
+                <p>
+                    <strong>Student Assistant System (RAG-Based Academic Assistant):</strong> Developed an AI-powered academic assistant that enables students to upload PDFs, ask context-aware questions, generate quizzes and flashcards, and receive accurate responses using a RAG pipeline with LLMs.
+                </p>
+            </div>
+
+            <!-- Internship -->
+            <div class="resume-sec">
+                <div class="resume-sec-title">Internship</div>
+                <p><strong>Tunga Aerospace Pvt Ltd, Chennai</strong> (05th Feb’25 to 06th Mar’25)</p>
+                <p>Software Engineering &ndash; Worked on a real-time ALPR system using Python, OpenCV, and EasyOCR for number plate detection.</p>
+            </div>
+
+            <!-- Education -->
+            <div class="resume-sec">
+                <div class="resume-sec-title">Education</div>
+                <p><strong>Rajalakshmi Engineering College, Thandalam, Tamil Nadu</strong> (2023 - 2027)<br>
+                    Bachelor of Technology - Information Technology &bull; <strong>CGPA: 7.87</strong></p>
+                <p style="margin-top: 0.4rem;"><strong>Swami Vivekanandha Matriculation Higher Secondary School,
+                        Kanchipuram, India</strong> (2021 - 2023)<br>
+                    Higher Secondary Certificate (HSC) &bull; <strong>Percentage: 87%</strong></p>
+            </div>
+
+            <!-- Competitions -->
+            <div class="resume-sec">
+                <div class="resume-sec-title">Competitions & Recognitions</div>
+                <p>• <strong>INNOVISION’ 24 Winner</strong> at Rajalakshmi Engineering College, Chennai.</p>
+                <p>• <strong>IOTRIX’ 25 Winner</strong> at Sairam Engineering College, Chennai.</p>
+                <p>• <strong>DESIGN SUMMIT’ 24 Runner up</strong> at Rajalakshmi Engineering College, Chennai.</p>
+            </div>
+
+            <!-- Achievements -->
+            <div class="resume-sec">
+                <div class="resume-sec-title">Achievements & Certifications</div>
+                <p>• <strong>Infosys Springboard</strong> &ndash; FrontEnd Web Developer Certification</p>
+                <p>• <strong>Human Computer Interaction</strong> &ndash; NPTEL Certification</p>
+                <p>• <strong>Introduction to Industry 4.0 and Internet of Things</strong> &ndash; NPTEL Certification</p>
+            </div>
+
+            <div class="resume-actions-bar">
+                <button type="button" class="btn-primary" onclick="window.print()">
+                    Print / Save PDF 🖨️
+                </button>
+                <button type="button" class="btn-secondary" id="closeResumeModalBtn2">
+                    Close Viewer
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== Floating Interactive Toast ==================== -->
+    <div class="portfolio-toast" id="portfolioToast" role="status" aria-live="polite">
+        <span class="toast-icon" id="toastIcon">✨</span>
+        <div class="toast-content">
+            <strong id="toastTitle">Notification</strong>
+            <p id="toastBody">Action completed.</p>
+        </div>
+    </div>
+
+
+    <!-- ==================== Footer ==================== -->
+    <footer class="footer">
+
+        <div class="footer-content">
+
+            <p>
+                &copy; 2026 Deepan Kumar S. All Rights Reserved. Crafted with passion & code.
+            </p>
+
+            <nav class="social-links" aria-label="Social Media Links">
+
+                <a href="https://github.com" class="social-link" target="_blank" rel="noopener noreferrer">
+                    GitHub
+                </a>
+
+                <a href="https://linkedin.com" class="social-link" target="_blank" rel="noopener noreferrer">
+                    LinkedIn
+                </a>
+
+                <a href="mailto:deepanmdsaran77@gmail.com" class="social-link">
+                    Email
+                </a>
+
+            </nav>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ==================== JavaScript ==================== -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALPR System | Automatic License Plate Recognition | Deepan Kumar S</title>
+    <meta name="description" content="Real-time Automatic License Plate Recognition (ALPR) system using Python, OpenCV and EasyOCR developed by Deepan Kumar S during internship at Tunga Aerospace.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="project-shared.css">
+    <style>
+        .alpr-dashboard {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 5% 4rem;
+            width: 100%;
+        }
+
+        .project-hero {
+            margin-bottom: 2.5rem;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(29, 78, 216, 0.06));
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-tagline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.9rem;
+            background: rgba(0, 229, 255, 0.12);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: var(--radius-pill);
+            color: var(--color-primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .project-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.8rem;
+            line-height: 1.25;
+        }
+
+        .project-hero p {
+            color: var(--color-text-secondary);
+            font-size: 1.05rem;
+            max-width: 850px;
+            line-height: 1.6;
+        }
+
+        .internship-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.2rem;
+            padding: 0.45rem 1rem;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            border-radius: var(--radius-md);
+            color: #4ade80;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* ALPR Interface Layout */
+        .alpr-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 980px) {
+            .alpr-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Camera Feed Box */
+        .camera-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-topbar {
+            padding: 1rem 1.4rem;
+            background: rgba(10, 14, 23, 0.7);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .feed-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--color-danger);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .feed-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--color-danger);
+            animation: pulseDot 1.2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .camera-viewport {
+            position: relative;
+            background: #030712;
+            height: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .car-graphic {
+            width: 88%;
+            height: 82%;
+            background: radial-gradient(circle at 50% 60%, #1e293b, #0a0f1d);
+            border-radius: 16px;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .scanner-beam {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+            box-shadow: 0 0 15px var(--color-primary);
+            top: 10%;
+            animation: scanMove 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes scanMove {
+            0% { top: 12%; }
+            100% { top: 88%; }
+        }
+
+        .plate-bounding-box {
+            position: relative;
+            width: 260px;
+            height: 90px;
+            border: 3px solid var(--color-primary);
+            border-radius: 8px;
+            background: rgba(0, 229, 255, 0.08);
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.35);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .plate-corner {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: #22c55e;
+            border-style: solid;
+        }
+        .plate-corner.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
+        .plate-corner.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; }
+        .plate-corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }
+        .plate-corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
+
+        .plate-text-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+        }
+
+        .plate-ocr-tag {
+            position: absolute;
+            top: -24px;
+            left: -2px;
+            background: var(--color-primary);
+            color: #030d17;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.15rem 0.6rem;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .camera-controls-bar {
+            padding: 1.2rem;
+            background: rgba(10, 14, 23, 0.95);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-ctrl {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.2rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .btn-ctrl-primary {
+            background: var(--color-primary);
+            color: #030d17;
+        }
+        .btn-ctrl-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-ctrl-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-color: var(--color-border);
+        }
+        .btn-ctrl-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Readout Telemetry Card */
+        .telemetry-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+        }
+
+        .telemetry-header {
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 1rem;
+        }
+
+        .telemetry-header h3 {
+            font-size: 1.25rem;
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+
+        .telemetry-header p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .readout-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+        }
+
+        .readout-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .readout-row:last-child {
+            border-bottom: none;
+        }
+
+        .readout-label {
+            color: var(--color-text-muted);
+        }
+
+        .readout-val {
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .readout-val.cyan { color: var(--color-primary); }
+        .readout-val.green { color: var(--color-accent); }
+
+        .pipeline-steps-card {
+            background: rgba(0, 229, 255, 0.04);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+        }
+
+        .pipeline-steps-card h4 {
+            font-size: 0.88rem;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.6rem;
+        }
+
+        .pipeline-steps-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+        }
+
+        .pipeline-steps-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Scanned History Table */
+        .history-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .history-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .history-table th {
+            padding: 0.8rem 1rem;
+            background: rgba(10, 14, 23, 0.8);
+            color: var(--color-text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--color-border);
+            white-space: nowrap;
+        }
+
+        .history-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+        }
+
+        .history-table tr:hover td {
+            background: rgba(0, 229, 255, 0.04);
+            color: #fff;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .badge-verified {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        /* Tech Architecture Grid */
+        .tech-arch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 860px) {
+            .tech-arch-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tech-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .tech-card:hover {
+            border-color: rgba(0, 229, 255, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .tech-card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .tech-card h3 {
+            font-size: 1.15rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-card p {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Bar -->
+    <header class="project-header-bar">
+        <a href="../projects.html" class="back-to-portfolio">
+            <span>&larr;</span> Back to Projects
+        </a>
+
+        <div class="project-meta-info">
+            <span class="project-badge" style="background: rgba(0, 229, 255, 0.15); color: #00e5ff; border: 1px solid rgba(0, 229, 255, 0.3);">
+                ⚡ Computer Vision & OCR
+            </span>
+            <span style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 500;">
+                By Deepan Kumar S
+            </span>
+        </div>
+    </header>
+
+    <main class="alpr-dashboard">
+
+        <!-- Project Hero -->
+        <section class="project-hero">
+            <span class="hero-tagline">🚀 Python &bull; OpenCV &bull; EasyOCR</span>
+            <h1>Automatic License Plate Recognition (ALPR)</h1>
+            <p>
+                A high-performance computer vision system developed to detect vehicle number plates in live video streams, isolate plate regions using bilateral filtering and edge contours, and extract alphanumeric registration text using deep learning EasyOCR for real-time traffic and parking intelligence.
+            </p>
+            <div class="internship-badge">
+                <span>🏢</span> Developed during Software Engineering Internship at <strong>Tunga Aerospace Pvt Ltd, Chennai</strong> (Feb - Mar 2025)
+            </div>
+        </section>
+
+        <!-- ALPR Interactive Live Sandbox -->
+        <section class="alpr-grid">
+
+            <!-- Camera Viewport Card -->
+            <div class="camera-card">
+                <div class="card-topbar">
+                    <div class="feed-indicator">
+                        <span class="feed-dot"></span>
+                        <span id="feedStatusText">LIVE FEED &bull; CAM_01 HIGHWAY TOLL</span>
+                    </div>
+                    <span style="font-size: 0.85rem; color: #22c55e; font-family: 'JetBrains Mono', monospace;" id="fpsCounter">
+                        45.2 FPS &bull; Low Latency
+                    </span>
+                </div>
+
+                <div class="camera-viewport">
+                    <div class="car-graphic" id="carGraphic">
+                        <div class="scanner-beam" id="scannerBeam"></div>
+                        <div style="font-size: 3.5rem; margin-bottom: 0.5rem;" id="vehicleEmoji">🚗</div>
+                        <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 600;" id="vehicleTypeLabel">
+                            White Sedan &bull; Lane 02 Inbound
+                        </span>
+
+                        <div class="plate-bounding-box" id="plateBox">
+                            <span class="plate-corner tl"></span>
+                            <span class="plate-corner tr"></span>
+                            <span class="plate-corner bl"></span>
+                            <span class="plate-corner br"></span>
+                            <span class="plate-ocr-tag" id="ocrConfidenceTag">OCR CONFIDENCE: 98.6%</span>
+                            <div class="plate-text-display" id="plateTextDisplay">TN 07 CM 2026</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="camera-controls-bar">
+                    <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnNextVehicle">
+                        🚗 Next Vehicle Scan
+                    </button>
+                    <button type="button" class="btn-ctrl btn-ctrl-secondary" id="btnToggleAuto">
+                        ▶ Auto Stream Scan
+                    </button>
+                    <button type="button" class="btn-ctrl btn-ctrl-secondary" id="btnToggleFilter">
+                        👁️ Toggle Grayscale / Edge
+                    </button>
+                    <span style="margin-left: auto; font-size: 0.8rem; color: var(--color-text-muted);">
+                        Simulation Active
+                    </span>
+                </div>
+            </div>
+
+            <!-- Real-Time Telemetry Card -->
+            <div class="telemetry-card">
+                <div class="telemetry-header">
+                    <h3>Recognition Telemetry</h3>
+                    <p>Live metrics captured from current OpenCV & EasyOCR inference frame</p>
+                </div>
+
+                <div class="readout-box">
+                    <div class="readout-row">
+                        <span class="readout-label">Plate Registration</span>
+                        <span class="readout-val cyan" id="telemetryPlate">TN 07 CM 2026</span>
+                    </div>
+                    <div class="readout-row">
+                        <span class="readout-label">State / Region</span>
+                        <span class="readout-val" id="telemetryState">Tamil Nadu, Chennai</span>
+                    </div>
+                    <div class="readout-row">
+                        <span class="readout-label">Recognition Accuracy</span>
+                        <span class="readout-val green" id="telemetryAccuracy">98.6%</span>
+                    </div>
+                    <div class="readout-row">
+                        <span class="readout-label">Inference Latency</span>
+                        <span class="readout-val" id="telemetryLatency">22.4 ms</span>
+                    </div>
+                    <div class="readout-row">
+                        <span class="readout-label">Vehicle Category</span>
+                        <span class="readout-val" id="telemetryCategory">Light Motor Vehicle</span>
+                    </div>
+                    <div class="readout-row">
+                        <span class="readout-label">Database Match</span>
+                        <span class="readout-val green" id="telemetryStatus">VERIFIED &bull; PASS</span>
+                    </div>
+                </div>
+
+                <div class="pipeline-steps-card">
+                    <h4>OpenCV & EasyOCR Execution Pipeline</h4>
+                    <ul class="pipeline-steps-list">
+                        <li><span>✓</span> <strong>Frame Acquisition:</strong> Camera capture @ 60 FPS</li>
+                        <li><span>✓</span> <strong>Bilateral Filter:</strong> Noise removal while preserving edges</li>
+                        <li><span>✓</span> <strong>Canny Edge Detection:</strong> Gradient contour extraction</li>
+                        <li><span>✓</span> <strong>Perspective Warp:</strong> Deskewing rectangular plate ROI</li>
+                        <li><span>✓</span> <strong>EasyOCR Inference:</strong> Text recognition via CRNN model</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Live Vehicle Logs Table -->
+        <section class="history-card">
+            <div class="history-card-header">
+                <div>
+                    <h3 style="font-size: 1.3rem; color: #fff; margin-bottom: 0.2rem;">Live Recognition Log Database</h3>
+                    <p style="font-size: 0.85rem; color: var(--color-text-muted);">Real-time vehicle passage logs recorded by ALPR edge pipeline</p>
+                </div>
+                <button type="button" class="btn-ctrl btn-ctrl-secondary" id="btnExportCSV">
+                    📥 Export CSV Log
+                </button>
+            </div>
+
+            <div class="history-table-wrapper">
+                <table class="history-table" id="logsTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Plate Number</th>
+                            <th>State / Region</th>
+                            <th>Vehicle Type</th>
+                            <th>Confidence</th>
+                            <th>Processing Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr>
+                            <td>14:32:10</td>
+                            <td><strong style="color: #00e5ff; font-family: monospace;">TN 07 CM 2026</strong></td>
+                            <td>Tamil Nadu</td>
+                            <td>Sedan</td>
+                            <td>98.6%</td>
+                            <td>22.4 ms</td>
+                            <td><span class="badge-status badge-verified">✓ Verified</span></td>
+                        </tr>
+                        <tr>
+                            <td>14:31:42</td>
+                            <td><strong style="color: #00e5ff; font-family: monospace;">TN 21 BL 4092</strong></td>
+                            <td>Tamil Nadu (Kanchipuram)</td>
+                            <td>SUV</td>
+                            <td>97.9%</td>
+                            <td>24.1 ms</td>
+                            <td><span class="badge-status badge-verified">✓ Verified</span></td>
+                        </tr>
+                        <tr>
+                            <td>14:30:15</td>
+                            <td><strong style="color: #00e5ff; font-family: monospace;">KA 03 MX 8812</strong></td>
+                            <td>Karnataka (Bengaluru)</td>
+                            <td>Hatchback</td>
+                            <td>99.2%</td>
+                            <td>20.8 ms</td>
+                            <td><span class="badge-status badge-verified">✓ Verified</span></td>
+                        </tr>
+                        <tr>
+                            <td>14:28:50</td>
+                            <td><strong style="color: #00e5ff; font-family: monospace;">MH 02 CZ 9901</strong></td>
+                            <td>Maharashtra (Mumbai)</td>
+                            <td>Commercial Van</td>
+                            <td>96.8%</td>
+                            <td>26.5 ms</td>
+                            <td><span class="badge-status badge-verified">✓ Verified</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Technical Architecture Cards -->
+        <section class="tech-arch-grid">
+            <div class="tech-card">
+                <div class="tech-card-icon">📷</div>
+                <h3>OpenCV Computer Vision</h3>
+                <p>
+                    Utilizes morphological transformations, Gaussian blurring, and adaptive thresholding to detect high-frequency license plate contours under diverse lighting and weather conditions.
+                </p>
+            </div>
+
+            <div class="tech-card">
+                <div class="tech-card-icon">🔤</div>
+                <h3>EasyOCR Text Extraction</h3>
+                <p>
+                    Leverages PyTorch deep learning OCR models to accurately recognize character sets, state code prefixes, and numeric sequences with sub-30ms execution times.
+                </p>
+            </div>
+
+            <div class="tech-card">
+                <div class="tech-card-icon">⚡</div>
+                <h3>Tunga Aerospace Deployment</h3>
+                <p>
+                    Engineered during industrial internship at Tunga Aerospace Pvt Ltd to automate barrier gate access control, vehicle throughput tracking, and fleet surveillance.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Simulated vehicle database
+        const vehicles = [
+            { plate: "TN 07 CM 2026", state: "Tamil Nadu, Chennai", accuracy: "98.6%", latency: "22.4 ms", type: "White Sedan", emoji: "🚗" },
+            { plate: "TN 21 BL 4092", state: "Tamil Nadu, Kanchipuram", accuracy: "97.9%", latency: "24.1 ms", type: "Silver SUV", emoji: "🚙" },
+            { plate: "KA 05 MN 7890", state: "Karnataka, Bengaluru", accuracy: "99.1%", latency: "21.3 ms", type: "Electric Sedan", emoji: "⚡" },
+            { plate: "DL 01 AB 3456", state: "Delhi NCR", accuracy: "98.2%", latency: "23.8 ms", type: "Commercial Van", emoji: "🚐" },
+            { plate: "MH 12 XY 9081", state: "Maharashtra, Pune", accuracy: "96.4%", latency: "27.2 ms", type: "Cargo Truck", emoji: "🚛" },
+            { plate: "TN 09 CQ 5511", state: "Tamil Nadu, Chennai", accuracy: "99.4%", latency: "19.8 ms", type: "Luxury Sedan", emoji: "🏎️" }
+        ];
+
+        let currentIndex = 0;
+        let autoInterval = null;
+        let isGrayscale = false;
+
+        const plateTextDisplay = document.getElementById("plateTextDisplay");
+        const ocrConfidenceTag = document.getElementById("ocrConfidenceTag");
+        const vehicleEmoji = document.getElementById("vehicleEmoji");
+        const vehicleTypeLabel = document.getElementById("vehicleTypeLabel");
+        const telemetryPlate = document.getElementById("telemetryPlate");
+        const telemetryState = document.getElementById("telemetryState");
+        const telemetryAccuracy = document.getElementById("telemetryAccuracy");
+        const telemetryLatency = document.getElementById("telemetryLatency");
+        const logsTableBody = document.getElementById("logsTableBody");
+        const carGraphic = document.getElementById("carGraphic");
+
+        function scanVehicle(index) {
+            const v = vehicles[index % vehicles.length];
+            currentIndex = index;
+
+            plateTextDisplay.textContent = v.plate;
+            ocrConfidenceTag.textContent = `OCR CONFIDENCE: ${v.accuracy}`;
+            vehicleEmoji.textContent = v.emoji;
+            vehicleTypeLabel.textContent = `${v.type} • Lane 02 Inbound`;
+
+            telemetryPlate.textContent = v.plate;
+            telemetryState.textContent = v.state;
+            telemetryAccuracy.textContent = v.accuracy;
+            telemetryLatency.textContent = v.latency;
+
+            // Prepend to log table
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${timeStr}</td>
+                <td><strong style="color: #00e5ff; font-family: monospace;">${v.plate}</strong></td>
+                <td>${v.state}</td>
+                <td>${v.type}</td>
+                <td>${v.accuracy}</td>
+                <td>${v.latency}</td>
+                <td><span class="badge-status badge-verified">✓ Verified</span></td>
+            `;
+            logsTableBody.insertBefore(row, logsTableBody.firstChild);
+
+            // Flash border
+            const plateBox = document.getElementById("plateBox");
+            plateBox.style.transform = "scale(1.05)";
+            setTimeout(() => {
+                plateBox.style.transform = "scale(1)";
+            }, 250);
+        }
+
+        document.getElementById("btnNextVehicle").addEventListener("click", () => {
+            scanVehicle(currentIndex + 1);
+        });
+
+        document.getElementById("btnToggleAuto").addEventListener("click", function() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                this.textContent = "▶ Auto Stream Scan";
+                this.classList.remove("btn-ctrl-primary");
+                this.classList.add("btn-ctrl-secondary");
+            } else {
+                this.textContent = "⏹ Pause Stream";
+                this.classList.add("btn-ctrl-primary");
+                this.classList.remove("btn-ctrl-secondary");
+                autoInterval = setInterval(() => {
+                    scanVehicle(currentIndex + 1);
+                }, 3200);
+            }
+        });
+
+        document.getElementById("btnToggleFilter").addEventListener("click", function() {
+            isGrayscale = !isGrayscale;
+            if (isGrayscale) {
+                carGraphic.style.filter = "grayscale(100%) contrast(150%)";
+                this.textContent = "🌈 Revert to Normal RGB";
+            } else {
+                carGraphic.style.filter = "none";
+                this.textContent = "👁️ Toggle Grayscale / Edge";
+            }
+        });
+
+        document.getElementById("btnExportCSV").addEventListener("click", () => {
+            let csv = "Time,Plate Number,State,Vehicle Type,Confidence,Latency,Status\n";
+            const rows = logsTableBody.querySelectorAll("tr");
+            rows.forEach(r => {
+                const cols = Array.from(r.querySelectorAll("td")).map(c => `"${c.innerText.trim()}"`);
+                csv += cols.join(",") + "\n";
+            });
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `ALPR_Vehicle_Logs_${Date.now()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
+

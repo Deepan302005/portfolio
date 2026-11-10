@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Assistant System | RAG-Based Academic Assistant | Deepan Kumar S</title>
+    <meta name="description" content="AI-powered Student Assistant System using RAG pipeline, LLMs, and PDF document retrieval developed by Deepan Kumar S.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="project-shared.css">
+    <style>
+        .rag-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 5% 4rem;
+            width: 100%;
+        }
+
+        .project-hero {
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.08), rgba(0, 229, 255, 0.06));
+            border: 1px solid rgba(29, 78, 216, 0.25);
+            border-radius: var(--radius-lg);
+            padding: 2.2rem;
+            position: relative;
+        }
+
+        .hero-tagline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.9rem;
+            background: rgba(29, 78, 216, 0.12);
+            border: 1px solid rgba(29, 78, 216, 0.35);
+            border-radius: var(--radius-pill);
+            color: #93c5fd;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .project-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.8rem;
+        }
+
+        .project-hero p {
+            color: var(--color-text-secondary);
+            font-size: 1.05rem;
+            max-width: 860px;
+            line-height: 1.6;
+        }
+
+        /* Mode Selector Tabs */
+        .tab-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+            padding: 0.65rem 1.4rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            background: #1d4ed8;
+            color: #fff;
+            border-color: #1d4ed8;
+            box-shadow: 0 0 20px rgba(29, 78, 216, 0.4);
+        }
+
+        /* 2-Column Layout */
+        .rag-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 960px) {
+            .rag-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Document Library Card */
+        .doc-sidebar {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            height: fit-content;
+        }
+
+        .doc-sidebar h3 {
+            font-size: 1.15rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pdf-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .pdf-item {
+            background: rgba(10, 14, 23, 0.6);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pdf-item:hover {
+            border-color: #1d4ed8;
+            background: rgba(29, 78, 216, 0.08);
+        }
+
+        .pdf-item.active {
+            border-color: #1d4ed8;
+            background: rgba(29, 78, 216, 0.15);
+            box-shadow: 0 0 15px rgba(29, 78, 216, 0.25);
+        }
+
+        .pdf-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .pdf-size {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .btn-upload-mock {
+            border: 2px dashed rgba(29, 78, 216, 0.4);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+            color: #93c5fd;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(29, 78, 216, 0.04);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-upload-mock:hover {
+            background: rgba(29, 78, 216, 0.1);
+            border-color: #1d4ed8;
+        }
+
+        .vector-pipeline-box {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-size: 0.82rem;
+            color: var(--color-text-secondary);
+        }
+
+        .vector-pipeline-box h4 {
+            color: #93c5fd;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        /* Workspace Card */
+        .workspace-card {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 580px;
+        }
+
+        .workspace-header {
+            padding: 1rem 1.6rem;
+            background: rgba(10, 14, 23, 0.8);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Q&A Chat Mode */
+        .chat-view {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        .messages-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            overflow-y: auto;
+            max-height: 380px;
+            padding-right: 0.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .message-bubble {
+            padding: 1rem 1.3rem;
+            border-radius: var(--radius-md);
+            max-width: 85%;
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .message-bubble.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #1d4ed8, #6366f1);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-bubble.ai {
+            align-self: flex-start;
+            background: rgba(10, 16, 28, 0.8);
+            border: 1px solid rgba(29, 78, 216, 0.3);
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .citation-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.6rem;
+            padding: 0.25rem 0.65rem;
+            background: rgba(29, 78, 216, 0.15);
+            border: 1px solid rgba(29, 78, 216, 0.35);
+            border-radius: var(--radius-pill);
+            color: #93c5fd;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .prompt-suggestions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+            font-size: 0.78rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-chip:hover {
+            border-color: #1d4ed8;
+            color: #fff;
+            background: rgba(29, 78, 216, 0.1);
+        }
+
+        .chat-input-bar {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .chat-input-bar input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            background: rgba(10, 14, 23, 0.8);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-pill);
+            color: #fff;
+            outline: none;
+            font-size: 0.92rem;
+        }
+
+        .chat-input-bar input:focus {
+            border-color: #1d4ed8;
+            box-shadow: 0 0 15px rgba(29, 78, 216, 0.3);
+        }
+
+        .btn-send {
+            background: #1d4ed8;
+            color: #fff;
+            padding: 0.8rem 1.4rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-send:hover {
+            background: #7c3aed;
+            box-shadow: 0 0 15px rgba(29, 78, 216, 0.4);
+        }
+
+        /* Quiz Mode */
+        .quiz-view, .flashcard-view {
+            padding: 2rem;
+            display: none;
+        }
+
+        .quiz-card {
+            background: rgba(10, 16, 28, 0.6);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-question {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--color-border);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: #1d4ed8;
+            background: rgba(29, 78, 216, 0.08);
+        }
+
+        .quiz-option.correct {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: #22c55e;
+            color: #4ade80;
+            font-weight: 700;
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+            color: #f87171;
+        }
+
+        /* Flashcard Mode */
+        .flashcard-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .flashcard {
+            width: 100%;
+            max-width: 520px;
+            height: 280px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, #1e1b4b, #111827);
+            border: 2px solid #1d4ed8;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            color: #93c5fd;
+        }
+
+        /* Architecture features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 850px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-box {
+            background: var(--color-surface-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+        }
+
+        .feature-box h4 {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+
+        .feature-box p {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Bar -->
+    <header class="project-header-bar">
+        <a href="../projects.html" class="back-to-portfolio">
+            <span>&larr;</span> Back to Projects
+        </a>
+
+        <div class="project-meta-info">
+            <span class="project-badge" style="background: rgba(29, 78, 216, 0.15); color: #93c5fd; border: 1px solid rgba(29, 78, 216, 0.3);">
+                ✨ RAG Pipeline & LLMs
+            </span>
+            <span style="font-size: 0.85rem; color: var(--color-text-muted); font-weight: 500;">
+                By Deepan Kumar S
+            </span>
+        </div>
+    </header>
+
+    <main class="rag-container">
+
+        <!-- Hero -->
+        <section class="project-hero">
+            <span class="hero-tagline">📚 Student Assistant System (RAG-Based Academic Assistant)</span>
+            <h1>Intelligent Academic Assistant & Quiz Engine</h1>
+            <p>
+                An AI-powered academic assistant engineered to ingest courseware PDFs, create semantic vector embeddings, and retrieve accurate context-grounded responses using a Retrieval-Augmented Generation (RAG) pipeline paired with LLMs. Includes automated revision quiz generation and interactive flashcard decks.
+            </p>
+        </section>
+
+        <!-- Mode Switcher Tabs -->
+        <section class="tab-bar">
+            <button type="button" class="tab-btn active" data-tab="chat">
+                💬 Context-Aware Q&A Chat
+            </button>
+            <button type="button" class="tab-btn" data-tab="quiz">
+                📝 Auto Quiz Generator
+            </button>
+            <button type="button" class="tab-btn" data-tab="flashcards">
+                🗂️ Interactive Flashcards
+            </button>
+        </section>
+
+        <!-- Main Workspace -->
+        <section class="rag-grid">
+
+            <!-- Sidebar: PDF Library & Vector Pipeline -->
+            <aside class="doc-sidebar">
+                <h3>📁 Ingested Courseware</h3>
+
+                <div class="pdf-list">
+                    <div class="pdf-item active" data-doc="os">
+                        <div>
+                            <div class="pdf-title">Operating_Systems_Kernel.pdf</div>
+                            <div class="pdf-size">148 Chunks &bull; 2.4 MB</div>
+                        </div>
+                        <span style="color: #22c55e; font-size: 0.8rem;">● Ready</span>
+                    </div>
+
+                    <div class="pdf-item" data-doc="dsa">
+                        <div>
+                            <div class="pdf-title">Data_Structures_Trees.pdf</div>
+                            <div class="pdf-size">210 Chunks &bull; 3.8 MB</div>
+                        </div>
+                        <span style="color: #22c55e; font-size: 0.8rem;">● Ready</span>
+                    </div>
+
+                    <div class="pdf-item" data-doc="cn">
+                        <div>
+                            <div class="pdf-title">Computer_Networks_Protocols.pdf</div>
+                            <div class="pdf-size">185 Chunks &bull; 3.1 MB</div>
+                        </div>
+                        <span style="color: #22c55e; font-size: 0.8rem;">● Ready</span>
+                    </div>
+                </div>
+
+                <div class="btn-upload-mock" onclick="alert('PDF Vector Ingestion: Select any academic syllabus or textbook PDF to split into semantic chunks and generate vector embeddings.')">
+                    + Ingest & Vectorize New PDF
+                </div>
+
+                <div class="vector-pipeline-box">
+                    <h4>RAG Embedding Telemetry</h4>
+                    <p style="margin-bottom: 0.4rem;">• Chunk Size: <strong>512 tokens</strong></p>
+                    <p style="margin-bottom: 0.4rem;">• Overlap: <strong>64 tokens</strong></p>
+                    <p style="margin-bottom: 0.4rem;">• Similarity Metric: <strong>Cosine Distance</strong></p>
+                    <p>• Top-K Contexts: <strong>4 relevant chunks</strong></p>
+                </div>
+            </aside>
+
+            <!-- Workspace Card -->
+            <div class="workspace-card">
+
+                <div class="workspace-header">
+                    <div>
+                        <span style="font-size: 0.85rem; color: #93c5fd; font-weight: 700;" id="activeDocTitle">
+                            DOCUMENT: Operating_Systems_Kernel.pdf
+                        </span>
+                        <div style="font-size: 0.78rem; color: var(--color-text-muted);">
+                            LLM Grounding: Strict Document Context Only
+                        </div>
+                    </div>
+                    <span style="font-size: 0.8rem; background: rgba(34, 197, 94, 0.15); color: #4ade80; padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); font-weight: 700;">
+                        ● RAG Grounded
+                    </span>
+                </div>
+
+                <!-- Tab 1: Chat Mode -->
+                <div class="chat-view" id="chatView">
+                    <div class="messages-container" id="messagesContainer">
+                        <div class="message-bubble ai">
+                            👋 Hello Deepan! I'm your RAG Academic Assistant. Ask me anything from <strong>Operating_Systems_Kernel.pdf</strong>, or select one of the suggested engineering queries below.
+                        </div>
+                    </div>
+
+                    <div class="prompt-suggestions">
+                        <span class="suggestion-chip" onclick="askQuestion('What is the difference between Preemptive and Non-Preemptive scheduling?')">
+                            ⚡ Preemptive vs Non-Preemptive
+                        </span>
+                        <span class="suggestion-chip" onclick="askQuestion('Explain the 4 necessary conditions for Deadlock.')">
+                            🔒 4 Deadlock Conditions
+                        </span>
+                        <span class="suggestion-chip" onclick="askQuestion('How does Virtual Memory and Paging prevent external fragmentation?')">
+                            💾 Virtual Memory & Paging
+                        </span>
+                    </div>
+
+                    <form class="chat-input-bar" id="chatForm">
+                        <input type="text" id="userInput" placeholder="Ask a question about the uploaded document..." required autocomplete="off">
+                        <button type="submit" class="btn-send">Ask AI 🚀</button>
+                    </form>
+                </div>
+
+                <!-- Tab 2: Quiz Mode -->
+                <div class="quiz-view" id="quizView">
+                    <h3 style="color: #fff; margin-bottom: 0.5rem;">AI-Generated Revision Quiz</h3>
+                    <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        4 questions automatically extracted from context chunks of Operating Systems:
+                    </p>
+
+                    <div class="quiz-card">
+                        <div class="quiz-question">1. Which CPU scheduling algorithm suffers from the Convoy Effect?</div>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkOption(this, true, 'First-Come First-Served (FCFS) causes short processes to wait behind long CPU-burst processes.')">
+                                A) First-Come First-Served (FCFS)
+                            </div>
+                            <div class="quiz-option" onclick="checkOption(this, false, 'SJF minimizes average waiting time.')">
+                                B) Shortest Job First (SJF)
+                            </div>
+                            <div class="quiz-option" onclick="checkOption(this, false, 'Round Robin uses time quantum.')">
+                                C) Round Robin (RR)
+                            </div>
+                            <div class="quiz-option" onclick="checkOption(this, false, 'Priority scheduling prioritizes rank.')">
+                                D) Priority Scheduling
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card">
+                        <div class="quiz-question">2. Which condition is NOT necessary for a Deadlock to occur?</div>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkOption(this, false, 'Mutual Exclusion is a required condition.')">
+                                A) Mutual Exclusion
+                            </div>
+                            <div class="quiz-option" onclick="checkOption(this, false, 'Hold and Wait is a required condition.')">
+                                B) Hold and Wait
+                            </div>
+                            <div class="quiz-option" onclick="checkOption(this, true, 'Preemption breaks deadlock; No-Preemption is the required deadlock condition.')">
+                                C) Immediate Preemption
+                            </div>
+                            <div class="quiz-option" onclick="checkOption(this, false, 'Circular Wait is a required condition.')">
+                                D) Circular Wait
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Flashcards Mode -->
+                <div class="flashcard-view" id="flashcardView">
+                    <div class="flashcard-stage">
+                        <div class="flashcard" id="activeFlashcard" onclick="this.classList.toggle('flipped')">
+                            <div class="flashcard-inner">
+                                <div class="card-front">
+                                    <span style="font-size: 0.8rem; color: #93c5fd; margin-bottom: 1rem; text-transform: uppercase;">
+                                        Click to Flip &bull; Term
+                                    </span>
+                                    <h3 style="font-size: 1.8rem; color: #fff;" id="flashFront">Translation Lookaside Buffer (TLB)</h3>
+                                </div>
+                                <div class="card-back">
+                                    <span style="font-size: 0.8rem; color: #93c5fd; margin-bottom: 0.8rem; text-transform: uppercase;">
+                                        Academic Definition
+                                    </span>
+                                    <p style="font-size: 1.05rem; line-height: 1.6;" id="flashBack">
+                                        A high-speed hardware associative cache stored inside the MMU that maps virtual page addresses to physical frame addresses, reducing memory access latency from 2 cycles to 1 cycle during TLB hits.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="button" class="tab-btn" onclick="nextCard(-1)">Previous</button>
+                            <button type="button" class="tab-btn" onclick="nextCard(1)">Next Card &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Technical Architecture Cards -->
+        <section class="features-grid">
+            <div class="feature-box">
+                <h4>📄 Document Parsing & Chunking</h4>
+                <p>
+                    Extracts text and tables from academic PDF documents using PyPDF and LangChain, dividing text into semantic chunks with token overlaps to maintain continuity.
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h4>🔍 Vector Similarity Search</h4>
+                <p>
+                    Generates dense vector embeddings using sentence-transformer models and executes cosine similarity searches to retrieve the most contextually relevant passages.
+                </p>
+            </div>
+
+            <div class="feature-box">
+                <h4>🎯 Hallucination Prevention</h4>
+                <p>
+                    Enforces strict system prompt grounding so the academic assistant only formulates answers based on retrieved citations, providing page number references.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Tab switching
+        const tabs = document.querySelectorAll(".tab-btn");
+        const chatView = document.getElementById("chatView");
+        const quizView = document.getElementById("quizView");
+        const flashcardView = document.getElementById("flashcardView");
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                const target = tab.dataset.tab;
+                chatView.style.display = target === "chat" ? "flex" : "none";
+                quizView.style.display = target === "quiz" ? "block" : "none";
+                flashcardView.style.display = target === "flashcards" ? "block" : "none";
+            });
+        });
+
+        // Chatbot logic
+        const chatForm = document.getElementById("chatForm");
+        const userInput = document.getElementById("userInput");
+        const messagesContainer = document.getElementById("messagesContainer");
+
+        const knowledgeBase = {
+            deadlock: {
+                reply: "According to <strong>Operating_Systems_Kernel.pdf (Chapter 7 - Deadlocks)</strong>, four necessary and sufficient conditions must hold simultaneously for a deadlock to occur: <br><br>1. <strong>Mutual Exclusion:</strong> At least one resource must be non-shareable.<br>2. <strong>Hold and Wait:</strong> A process must be holding at least one resource while waiting to acquire others.<br>3. <strong>No Preemption:</strong> Resources cannot be forcibly taken from a process holding them.<br>4. <strong>Circular Wait:</strong> A closed chain of processes exists where each process holds resources needed by the next.",
+                citation: "Operating_Systems_Kernel.pdf • Section 7.2 (Similarity: 0.96)"
+            },
+            scheduling: {
+                reply: "According to <strong>Operating_Systems_Kernel.pdf (Chapter 5 - CPU Scheduling)</strong>:<br><br>• <strong>Preemptive Scheduling:</strong> The operating system can interrupt an actively running process and move it to the Ready queue when a higher priority process arrives or time slice expires (e.g., Round Robin, SRTF).<br>• <strong>Non-Preemptive Scheduling:</strong> Once a process takes the CPU, it keeps running until it terminates or blocks for I/O (e.g., FCFS).",
+                citation: "Operating_Systems_Kernel.pdf • Section 5.1 (Similarity: 0.94)"
+            },
+            memory: {
+                reply: "According to <strong>Operating_Systems_Kernel.pdf (Chapter 8 - Main Memory)</strong>:<br><br>• <strong>Paging:</strong> Memory management scheme that permits physical address space of a process to be noncontiguous. Physical memory is divided into fixed-size <strong>frames</strong>, and logical memory is divided into same-size <strong>pages</strong>.<br>• <strong>Fragmentation Solved:</strong> Eliminates external fragmentation completely since any free frame can be allocated to a process needing memory.",
+                citation: "Operating_Systems_Kernel.pdf • Section 8.4 (Similarity: 0.93)"
+            }
+        };
+
+        function addMessage(text, isUser = false, citation = "") {
+            const bubble = document.createElement("div");
+            bubble.className = `message-bubble ${isUser ? "user" : "ai"}`;
+            bubble.innerHTML = text;
+            if (citation) {
+                const citeEl = document.createElement("div");
+                citeEl.className = "citation-badge";
+                citeEl.innerHTML = `📌 Context: ${citation}`;
+                bubble.appendChild(citeEl);
+            }
+            messagesContainer.appendChild(bubble);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        window.askQuestion = function(q) {
+            userInput.value = q;
+            chatForm.dispatchEvent(new Event("submit"));
+        };
+
+        chatForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            userInput.value = "";
+
+            setTimeout(() => {
+                const lower = text.toLowerCase();
+                let match = null;
+                if (lower.includes("deadlock")) match = knowledgeBase.deadlock;
+                else if (lower.includes("scheduling") || lower.includes("preemptive")) match = knowledgeBase.scheduling;
+                else if (lower.includes("memory") || lower.includes("paging") || lower.includes("fragmentation")) match = knowledgeBase.memory;
+
+                if (match) {
+                    addMessage(match.reply, false, match.citation);
+                } else {
+                    addMessage(`I processed your query against the active vector database chunks for <strong>Operating_Systems_Kernel.pdf</strong>. Based on retrieved context: "${text}" is addressed through modular kernel services with deterministic time complexity. Relevant passages indicate direct hardware interfacing via interrupt vectors.`, false, "Operating_Systems_Kernel.pdf • Page 84 (Similarity: 0.89)");
+                }
+            }, 500);
+        });
+
+        // Flashcards
+        const flashcards = [
+            {
+                front: "Translation Lookaside Buffer (TLB)",
+                back: "A high-speed hardware associative cache stored inside the MMU that maps virtual page addresses to physical frame addresses, reducing memory access latency."
+            },
+            {
+                front: "Thrashing",
+                back: "A high-frequency page-fault state where the operating system spends significantly more time swapping pages into and out of memory than executing actual process instructions."
+            },
+            {
+                front: "Semaphores vs Mutex",
+                back: "A Mutex is a locking mechanism with ownership used to serialize access to a resource. A Semaphore is a signaling mechanism (binary or counting) without strict ownership."
+            }
+        ];
+        let cardIdx = 0;
+        window.nextCard = function(step) {
+            cardIdx = (cardIdx + step + flashcards.length) % flashcards.length;
+            const card = document.getElementById("activeFlashcard");
+            card.classList.remove("flipped");
+            setTimeout(() => {
+                document.getElementById("flashFront").textContent = flashcards[cardIdx].front;
+                document.getElementById("flashBack").textContent = flashcards[cardIdx].back;
+            }, 250);
+        };
+
+        window.checkOption = function(el, isCorrect, explanation) {
+            const parent = el.closest(".quiz-options");
+            parent.querySelectorAll(".quiz-option").forEach(o => o.onclick = null);
+            if (isCorrect) {
+                el.classList.add("correct");
+            } else {
+                el.classList.add("incorrect");
+            }
+            const expDiv = document.createElement("div");
+            expDiv.style.cssText = "font-size: 0.85rem; margin-top: 0.6rem; color: #93c5fd; padding: 0.5rem; background: rgba(29, 78, 216, 0.1); border-radius: 6px;";
+            expDiv.innerHTML = `<strong>${isCorrect ? "Correct! 🎉" : "Incorrect."}</strong> ${explanation}`;
+            parent.appendChild(expDiv);
+        };
+    </script>
+</body>
+</html>
+
+
